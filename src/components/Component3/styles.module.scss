@@ -1,0 +1,19 @@
+.container {
+  flex-direction: column;
+  background-color: lightgray;
+  width: calc(50% - 22px);
+  height: calc(50% - 10px);
+  border: 1px solid red;
+  padding: 10px;
+  text-align: center;
+}
+
+.table {
+  display: flex;
+  border: 1px solid #646cff;
+  flex-direction: row;
+  padding-left: 50px;
+  div {
+    padding-right: 20px;
+  }
+}

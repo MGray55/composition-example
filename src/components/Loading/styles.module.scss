@@ -1,0 +1,8 @@
+.container {
+  flex-direction: column;
+  background-color: cornflowerblue;
+  width: calc(50% - 22px);
+  height: calc(50% - 22px);
+  border: 1px solid red;
+  text-align: center;
+}

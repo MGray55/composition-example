@@ -1,0 +1,11 @@
+.flexGrid {
+  border: 1px solid black;
+  width: calc(50% - 10px);
+  height: calc(50% - 10px);
+  text-align: center;
+}
+.col {
+  width: 100%;
+  border: 1px solid gray;
+  flex: 1;
+}
