@@ -1,26 +1,23 @@
 import { useEffect, useState } from 'react';
 import ky from 'ky';
+import { LOADING_STATE } from 'hooks/constants';
 import { HTTPErrorWithData } from 'hooks/types.ts';
 
-const LOADING_STATES = {
-    LOADING: 'Loading',
-    SUCCESS: 'Success',
-    ERROR: 'Error',
-};
-
 /**
- * This custom hook lets you call ansync endpoint in a general way for re-use.
+ * This custom hook lets you call async endpoint in a general way for re-use.
  * @param url
+ * @param request - JSON payload
  * @param errorNotificationFn
  */
-const useGeneralizedCrudMethods = (
+const useDataFetchPost = (
     url: string,
-    errorNotificationFn?: (errorMessage: string) => void
+    request: object,
+    errorNotificationFn?: (errorMessage: string | unknown) => void
 ) => {
     const [data, setData] = useState<object | undefined>(undefined);
     const [error, setError] = useState<unknown | undefined>(undefined);
     const [loadingStatus, setLoadingStatus] = useState<string>(
-        LOADING_STATES.LOADING
+        LOADING_STATE.LOADING
     );
 
     if (!url || url.length === 0) {
@@ -39,30 +36,20 @@ const useGeneralizedCrudMethods = (
     useEffect(() => {
         const getData = async () => {
             try {
-                setLoadingStatus(LOADING_STATES.LOADING);
-                const data: object = await ky
-                    .get(url, {
-                        retry: {
-                            limit: 2,
-                            methods: ['get'],
-                            statusCodes: [413],
-                            backoffLimit: 1000,
-                        },
-                    })
-                    .json();
+                setLoadingStatus(LOADING_STATE.LOADING);
+                const data: object = await ky(url, {
+                    method: 'POST',
+                    json: JSON.stringify(request),
+                });
                 if (data) {
                     setData(data);
                 }
-                setLoadingStatus(LOADING_STATES.SUCCESS);
-            } catch (e) {
-                const formattedErrorString = formatErrorString(
-                    e as HTTPErrorWithData,
-                    url
-                );
+                setLoadingStatus(LOADING_STATE.SUCCESS);
+            } catch (e: unknown) {
                 setError(formatErrorString(e as HTTPErrorWithData, url));
-                setLoadingStatus(LOADING_STATES.ERROR);
+                setLoadingStatus(LOADING_STATE.ERROR);
                 if (errorNotificationFn) {
-                    errorNotificationFn(formattedErrorString);
+                    errorNotificationFn(e);
                 }
             }
         };
@@ -72,7 +59,7 @@ const useGeneralizedCrudMethods = (
     const reFetchData = () => {
         const getData = async () => {
             try {
-                setLoadingStatus(LOADING_STATES.LOADING);
+                setLoadingStatus(LOADING_STATE.LOADING);
                 const data: object = await ky
                     .get(url, {
                         retry: {
@@ -86,10 +73,10 @@ const useGeneralizedCrudMethods = (
                 if (data) {
                     setData(data);
                 }
-                setLoadingStatus(LOADING_STATES.SUCCESS);
-            } catch (e) {
+                setLoadingStatus(LOADING_STATE.SUCCESS);
+            } catch (e: unknown) {
                 setError(formatErrorString(e as HTTPErrorWithData, url));
-                setLoadingStatus(LOADING_STATES.ERROR);
+                setLoadingStatus(LOADING_STATE.ERROR);
             }
         };
         getData();
@@ -97,10 +84,10 @@ const useGeneralizedCrudMethods = (
 
     return {
         data,
-        loadingStatus,
         error,
+        loadingStatus,
         reFetchData,
     };
 };
 
-export { LOADING_STATES, useGeneralizedCrudMethods };
+export { useDataFetchPost };
